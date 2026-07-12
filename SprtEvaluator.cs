@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LlmFin
+namespace LlmFinanceModel
 {
     public enum SprtDecision
     {

@@ -1,32 +1,33 @@
-# 📊 LlmProof.Core (.NET)
+# 📊 LlmProof.Finance (.NET)
 
 <p align="center">
   <img src="https://img.shields.io/badge/.NET-8.0-blue.svg?style=flat-square&logo=dotnet" alt=".NET Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License" />
 </p>
 
-`LlmProof.Core` is an enterprise-grade Wald's Sequential Probability Ratio Testing (SPRT) statistical evaluator for LLM and AI agent comparison in C# .NET. It lets you statistically compare LLM responses and stop testing early as soon as mathematical significance is reached, saving up to 50%+ in token evaluation costs.
+`LlmProof.Finance` is an enterprise-grade AI Trading Agent & Portfolio Strategy Validator in C# .NET. It calculates Sharpe/Sortino ratios and uses Sequential Probability Ratio Testing (SPRT) to statistically validate if your AI agent's investment strategy beats a baseline benchmark.
 
 ---
 
 ## 🚀 Quick Start (C#)
 
 ```csharp
-using LlmProof.Core;
+using LlmProof.Finance;
 
-// Configure evaluator (alpha = 5%, beta = 10%)
-var evaluator = new SprtEvaluator(alpha: 0.05, beta: 0.10, p0: 0.50, p1: 0.70);
+// Configure validator (alpha = 5%, beta = 10%)
+var validator = new StrategyValidator(alpha: 0.05, beta: 0.10, p0: 0.50, p1: 0.65);
 
-// Record outcomes (true for preferred model win, false otherwise)
-evaluator.AddSample(true);
-evaluator.AddSample(true);
-
-var decision = evaluator.AddSample(true);
+// Record daily outcomes (AI Strategy Return vs S&P 500 Return)
+var decision = validator.RecordTradingDay(0.012, 0.005); // Beat benchmark!
 
 if (decision == SprtDecision.AcceptH1)
 {
-    Console.WriteLine("Alternative model is statistically superior. Stop testing early!");
+    Console.WriteLine("AI strategy statistically beats the benchmark. Deploy to production!");
 }
+
+// Calculate metrics
+double sharpe = StrategyValidator.CalculateSharpeRatio(returns);
+double sortino = StrategyValidator.CalculateSortinoRatio(returns);
 ```
 
 ---

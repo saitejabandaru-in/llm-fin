@@ -1,58 +1,55 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace LlmProof.Core
+namespace LlmProof.Finance
 {
     public enum SprtDecision
     {
         Continue,
-        AcceptH1, // Alternative Hypothesis: Model B is statistically superior
-        AcceptH0  // Null Hypothesis: Model B is not statistically superior (or identical)
+        AcceptH1, // AI Strategy statistically beats the Benchmark portfolio
+        AcceptH0  // AI Strategy is identical or underperforms the Benchmark portfolio
     }
 
-    public class SprtEvaluator
+    public class StrategyValidator
     {
-        public double Alpha { get; }
-        public double Beta { get; }
-        public double P0 { get; }
-        public double P1 { get; }
-
+        private readonly double _alpha;
+        private readonly double _beta;
+        private readonly double _p0; // Null hypothesis success rate (underperformance threshold)
+        private readonly double _p1; // Alternative hypothesis success rate (outperformance target)
+        
         private readonly double _logLowerBound;
         private readonly double _logUpperBound;
         private double _logLikelihoodRatio = 0.0;
 
-        public int SampleCount { get; private set; } = 0;
-        public int SuccessCount { get; private set; } = 0;
+        public int TradingDays { get; private set; } = 0;
+        public int BenchmarkBeatenDays { get; private set; } = 0;
 
-        public SprtEvaluator(double alpha = 0.05, double beta = 0.10, double p0 = 0.50, double p1 = 0.70)
+        public StrategyValidator(double alpha = 0.05, double beta = 0.10, double p0 = 0.50, double p1 = 0.65)
         {
-            if (p0 <= 0 || p0 >= 1 || p1 <= 0 || p1 >= 1 || p0 >= p1)
-                throw new ArgumentException("Hypothesis bounds p0 and p1 must satisfy 0 < p0 < p1 < 1.");
-            if (alpha <= 0 || alpha >= 1 || beta <= 0 || beta >= 1)
-                throw new ArgumentException("Error bounds alpha and beta must satisfy 0 < alpha, beta < 1.");
+            _alpha = alpha;
+            _beta = beta;
+            _p0 = p0;
+            _p1 = p1;
 
-            Alpha = alpha;
-            Beta = beta;
-            P0 = p0;
-            P1 = p1;
-
-            // Wald's boundaries
-            _logLowerBound = Math.Log(Beta / (1.0 - Alpha));
-            _logUpperBound = Math.Log((1.0 - Beta) / Alpha);
+            _logLowerBound = Math.Log(_beta / (1.0 - _alpha));
+            _logUpperBound = Math.Log((1.0 - _beta) / _alpha);
         }
 
         /**
-         * Records a single outcome: true for success (preferred model wins), false for failure.
-         * Returns the current decision state.
+         * Evaluates a daily trading outcome against benchmark return.
+         * Returns whether statistical significance has been reached to conclude strategy performance.
          */
-        public SprtDecision AddSample(bool isSuccess)
+        public SprtDecision RecordTradingDay(double strategyReturn, double benchmarkReturn)
         {
-            SampleCount++;
-            if (isSuccess) SuccessCount++;
+            TradingDays++;
+            bool beatBenchmark = strategyReturn > benchmarkReturn;
+            if (beatBenchmark) BenchmarkBeatenDays++;
 
-            double pSuccessRatio = P1 / P0;
-            double pFailureRatio = (1.0 - P1) / (1.0 - P0);
+            double pSuccessRatio = _p1 / _p0;
+            double pFailureRatio = (1.0 - _p1) / (1.0 - _p0);
 
-            _logLikelihoodRatio += Math.Log(isSuccess ? pSuccessRatio : pFailureRatio);
+            _logLikelihoodRatio += Math.Log(beatBenchmark ? pSuccessRatio : pFailureRatio);
 
             if (_logLikelihoodRatio >= _logUpperBound)
             {
@@ -64,6 +61,47 @@ namespace LlmProof.Core
             }
 
             return SprtDecision.Continue;
+        }
+
+        /**
+         * Calculate the Sharpe Ratio (Risk-Adjusted Return)
+         */
+        public static double CalculateSharpeRatio(IEnumerable<double> returns, double riskFreeRate = 0.02)
+        {
+            double[] returnsArray = returns.ToArray();
+            if (returnsArray.Length < 2) return 0.0;
+
+            double avgReturn = returnsArray.Average();
+            double excessReturn = avgReturn - (riskFreeRate / 252.0); // Daily risk free rate
+
+            double sumOfSquares = returnsArray.Select(r => Math.Pow(r - avgReturn, 2)).Sum();
+            double stdDev = Math.Sqrt(sumOfSquares / (returnsArray.Length - 1));
+
+            if (stdDev == 0.0) return 0.0;
+            return (excessReturn / stdDev) * Math.Sqrt(252.0); // Annualized
+        }
+
+        /**
+         * Calculate the Sortino Ratio (Downside Risk-Adjusted Return)
+         */
+        public static double CalculateSortinoRatio(IEnumerable<double> returns, double riskFreeRate = 0.02)
+        {
+            double[] returnsArray = returns.ToArray();
+            if (returnsArray.Length < 2) return 0.0;
+
+            double avgReturn = returnsArray.Average();
+            double excessReturn = avgReturn - (riskFreeRate / 252.0);
+
+            // Calculate downside deviation (only negative returns relative to target/risk-free)
+            double dailyTarget = riskFreeRate / 252.0;
+            double downsideSum = returnsArray
+                .Select(r => r < dailyTarget ? Math.Pow(r - dailyTarget, 2) : 0.0)
+                .Sum();
+            
+            double downsideDev = Math.Sqrt(downsideSum / returnsArray.Length);
+
+            if (downsideDev == 0.0) return 0.0;
+            return (excessReturn / downsideDev) * Math.Sqrt(252.0); // Annualized
         }
 
         public double GetLogLikelihoodRatio() => _logLikelihoodRatio;

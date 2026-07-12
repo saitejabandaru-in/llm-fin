@@ -22,7 +22,7 @@ jobs:
       run: dotnet build --no-restore -c Release
       
     - name: Test / Verify
-      run: dotnet run --project LlmProof.Core.csproj -c Release
+      run: dotnet run --project LlmProof.Finance.csproj -c Release
       
     - name: Package NuGet
       run: dotnet pack -c Release -o out

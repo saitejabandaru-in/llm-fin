@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>LlmFin</id>
+    <version>0.2.0</version>
+    <authors>Sai Teja Bandaru</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <description>Enterprise-grade AI Trading Agent &amp; Portfolio Strategy Validator. Evaluates returns, Sharpe Ratio, Sortino Ratio, and runs SPRT validations against benchmarks.</description>
+    <repository type="git" url="https://github.com/saitejabandaru-in/llm-fin" commit="59171e9f6dbfbdd7bc2add90d66cd9e47215c64d" />
+    <dependencies>
+      <group targetFramework="net8.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="/app/bin/Release/net8.0/LlmFin.dll" target="lib/net8.0/LlmFin.dll" />
+  </files>
+</package>

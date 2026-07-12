@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
-using LlmProof.Finance;
+using LlmFin;
 
-namespace LlmProof.Test
+namespace LlmFin.Test
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Running C# .NET LlmProof.Finance Quantitative AI Tests...");
+            Console.WriteLine("Running C# .NET LlmFin Quantitative AI Tests...");
 
             // 1. Setup mock daily returns for AI trading agent and baseline benchmark
             var aiReturns = new List<double>();

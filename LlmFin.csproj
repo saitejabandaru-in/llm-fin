@@ -6,12 +6,12 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     
-    <PackageId>LlmProof.Finance</PackageId>
+    <PackageId>LlmFin</PackageId>
     <Version>0.2.0</Version>
     <Authors>Sai Teja Bandaru</Authors>
-    <Description>Enterprise-grade AI Trading Agent & Portfolio Strategy Validator. Evaluates returns, Sharpe Ratio, Sortino Ratio, and runs SPRT validations against benchmarks.</Description>
+    <Description>Enterprise-grade AI Trading Agent &amp; Portfolio Strategy Validator. Evaluates returns, Sharpe Ratio, Sortino Ratio, and runs SPRT validations against benchmarks.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/saitejabandaru-in/llm-proof-dotnet</RepositoryUrl>
+    <RepositoryUrl>https://github.com/saitejabandaru-in/llm-fin</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
